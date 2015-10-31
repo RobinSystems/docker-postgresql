@@ -88,7 +88,7 @@ fi
 
 # allow remote connections to postgresql database
 cat >> ${PG_CONFDIR}/pg_hba.conf <<EOF
-host    all             all             0.0.0.0/0               md5
+host    all             all             0.0.0.0/0               trust
 EOF
 
 # allow replication connections to the database
@@ -242,3 +242,8 @@ fi
 echo "Starting PostgreSQL server..."
 exec start-stop-daemon --start --chuid ${PG_USER}:${PG_USER} --exec ${PG_BINDIR}/postgres -- \
   -D ${PG_DATADIR} -c config_file=${PG_CONFDIR}/postgresql.conf
+
+sudo -Hu ${PG_USER} sh -c "createuser -d -r -s docker" && \
+sudo -Hu ${PG_USER} sh -c "createdb -O docker docker" && \
+sudo -Hu ${PG_USER} sh -c "psql -c \"GRANT ALL PRIVILEGES ON DATABASE docker to docker;\""
+
